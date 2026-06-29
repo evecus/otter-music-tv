@@ -1,0 +1,278 @@
+/* ============================================================
+   tv.css — Android TV / 大屏专用样式
+   在 TV 模式下由 TVLayout 动态 import，不影响手机端体积。
+   ============================================================ */
+
+/* ---- 1. 全局字号放大（TV 观看距离更远）---- */
+html.tv-mode {
+  font-size: 18px; /* 手机默认 16px */
+}
+
+/* ---- 2. 滚动条隐藏（遥控器不需要拖动滚动条）---- */
+html.tv-mode ::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---- 3. 焦点高亮环 —— TV 最核心的交互反馈 ---- */
+/*
+  使用 :focus-visible 而非 :focus，
+  避免鼠标点击时也出现焦点环（手机/触屏不受影响）。
+*/
+html.tv-mode *:focus-visible {
+  outline: 3px solid hsl(var(--ring, 158 100% 31%)) !important;
+  outline-offset: 3px !important;
+  border-radius: 8px;
+  /* 阴影让焦点环在深色背景上也清晰可见 */
+  box-shadow:
+    0 0 0 6px hsl(var(--ring, 158 100% 31%) / 0.25),
+    0 0 16px hsl(var(--ring, 158 100% 31%) / 0.4) !important;
+  transition: outline 0.1s, box-shadow 0.1s;
+}
+
+/* ---- 4. TV 侧边栏导航 ---- */
+.tv-sidebar {
+  width: 220px;
+  min-width: 220px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--sidebar, hsl(214 42% 7%));
+  border-right: 1px solid hsl(var(--border, 217 15% 17%));
+  padding: 24px 12px 16px;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.tv-sidebar__logo {
+  padding: 0 12px 20px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--primary, hsl(159 45% 56%));
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tv-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--sidebar-foreground, hsl(215 27% 91%));
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+  border: 2px solid transparent;
+  outline: none; /* 由 :focus-visible 统一控制 */
+}
+
+.tv-nav-item:hover,
+.tv-nav-item:focus-visible {
+  background: var(--sidebar-accent, hsl(217 21% 12%));
+  color: var(--sidebar-primary, hsl(161 40% 54%));
+}
+
+.tv-nav-item.active {
+  background: var(--sidebar-accent, hsl(217 21% 12%));
+  color: var(--sidebar-primary, hsl(161 40% 54%));
+  border-color: var(--sidebar-primary, hsl(161 40% 54%));
+}
+
+.tv-nav-item__icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* ---- 5. TV 播放控制栏 ---- */
+.tv-player-bar {
+  height: 90px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 28px;
+  background: var(--card, hsl(215 30% 11%));
+  border-top: 1px solid hsl(var(--border, 217 15% 17%));
+}
+
+.tv-player-bar__cover {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tv-player-bar__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tv-player-bar__title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground, hsl(213 30% 93%));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tv-player-bar__artist {
+  font-size: 0.875rem;
+  color: var(--muted-foreground, hsl(215 7% 65%));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.tv-player-bar__controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.tv-ctrl-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px solid transparent;
+  color: var(--foreground, hsl(213 30% 93%));
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  outline: none;
+}
+
+.tv-ctrl-btn:hover,
+.tv-ctrl-btn:focus-visible {
+  background: var(--secondary, hsl(219 18% 15%));
+  color: var(--primary, hsl(159 45% 56%));
+}
+
+.tv-ctrl-btn--primary {
+  width: 56px;
+  height: 56px;
+  background: var(--primary, hsl(159 45% 56%));
+  color: var(--primary-foreground, hsl(218 17% 9%));
+}
+
+.tv-ctrl-btn--primary:hover,
+.tv-ctrl-btn--primary:focus-visible {
+  background: var(--accent, hsl(170 37% 49%));
+  color: var(--accent-foreground, hsl(223 24% 6%));
+}
+
+/* 进度条 */
+.tv-progress-wrap {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tv-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--muted, hsl(215 18% 13%));
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tv-progress-bar__fill {
+  height: 100%;
+  background: var(--primary, hsl(159 45% 56%));
+  border-radius: 2px;
+  transition: width 0.5s linear;
+}
+
+.tv-progress-time {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--muted-foreground, hsl(215 7% 65%));
+}
+
+/* ---- 6. TV 主内容区 ---- */
+.tv-main-layout {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--background, hsl(218 36% 9%));
+}
+
+.tv-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tv-page-scroll {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+/* ---- 7. TV 歌曲列表项 —— 更大的点击区域 ---- */
+html.tv-mode .music-track-item {
+  padding: 14px 16px !important;
+  min-height: 60px !important;
+}
+
+/* ---- 8. TV 搜索框 —— 更大输入区域 ---- */
+html.tv-mode input[type="text"],
+html.tv-mode input[type="search"] {
+  font-size: 1rem;
+  padding: 12px 16px;
+  height: auto;
+}
+
+/* ============================================================
+   tv.css 补丁：Android TV WebView 兼容性
+   ============================================================ */
+
+/*
+  Android TV WebView (Chromium) 用方向键移动焦点时触发 :focus-visible，
+  但部分老版本 WebView 只触发 :focus。
+  这里同时覆盖 :focus（在 tv-mode 下），确保焦点环在所有 WebView 版本可见。
+*/
+html.tv-mode *:focus {
+  outline: 3px solid hsl(var(--ring, 158 100% 31%)) !important;
+  outline-offset: 3px !important;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 6px hsl(var(--ring, 158 100% 31%) / 0.25),
+    0 0 16px hsl(var(--ring, 158 100% 31%) / 0.4) !important;
+}
+
+/* 但鼠标点击时不要焦点环（:focus-not-visible 场景，用 JS 辅助） */
+html.tv-mode.using-mouse *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* MusicTrackItem 在 TV 模式下加大点击区域 */
+html.tv-mode [tabindex="0"] {
+  min-height: 48px;
+}
+
+/* 搜索输入框在 TV 模式下更大 */
+html.tv-mode input[type="text"],
+html.tv-mode input[type="search"],
+html.tv-mode input {
+  font-size: 1rem !important;
+  padding: 10px 14px !important;
+  height: auto !important;
+}
