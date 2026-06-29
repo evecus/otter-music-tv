@@ -95,7 +95,11 @@ export function MusicNowPlayingBar({
       >
         {/* 不含列表按钮，避免遮罩层关闭时 ghost click 误触发全屏 */}
         <div
-          className="flex items-center flex-1 min-w-0 cursor-pointer"
+          className="flex items-center flex-1 min-w-0 cursor-pointer rounded-xl"
+          role="button"
+          tabIndex={0}
+          data-tv-focusable="true"
+          aria-label="打开全屏播放器"
           onClick={() => onOpenFullScreen?.()}
         >
           {/* 专辑封面 */}

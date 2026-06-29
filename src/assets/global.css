@@ -272,3 +272,58 @@
   animation: marquee var(--duration, 20s) linear infinite;
   will-change: transform;
 }
+
+@layer base {
+  :where(
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    summary,
+    [role="button"],
+    [role="tab"],
+    [role="menuitem"],
+    [data-tv-focusable="true"],
+    [tabindex]:not([tabindex="-1"])
+  ):focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--ring) 24%, transparent);
+  }
+
+  .tv-remote-mode
+    :where(
+      button,
+      a,
+      input,
+      select,
+      textarea,
+      summary,
+      [role="button"],
+      [role="tab"],
+      [role="menuitem"],
+      [data-tv-focusable="true"],
+      [tabindex]:not([tabindex="-1"])
+    ):focus {
+    outline: 3px solid var(--ring);
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 6px color-mix(in oklab, var(--ring) 28%, transparent),
+      0 10px 24px rgb(0 0 0 / 18%);
+    transform: scale(1.03);
+  }
+
+  .tv-remote-mode
+    :where(
+      button,
+      a,
+      [role="button"],
+      [role="tab"],
+      [role="menuitem"],
+      [data-tv-focusable="true"]
+    ):focus {
+    position: relative;
+    z-index: 10;
+  }
+}

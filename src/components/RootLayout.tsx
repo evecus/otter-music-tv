@@ -6,6 +6,7 @@ import { GlobalMusicPlayer } from "@/components/GlobalMusicPlayer";
 import { useMusicStore } from "@/store/music-store";
 import { useShallow } from "zustand/react/shallow";
 import { useExitLayer } from "@/hooks/useExitLayer";
+import { useTvRemoteNavigation } from "@/hooks/useTvRemoteNavigation";
 import { App as CapacitorApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
 import { useEffect, useCallback, useRef, lazy, Suspense } from "react";
@@ -18,7 +19,25 @@ const FullScreenPlayer = lazy(() =>
 
 const ROOT_TAB_PATHS = ["/", "/search", "/favorites", "/mine"] as const;
 
+const WEB_BACK_KEYS = new Set(["Escape", "BrowserBack", "Backspace"]);
+
+const isEditableTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) return false;
+  const tagName = target.tagName.toLowerCase();
+  return (
+    target.isContentEditable ||
+    tagName === "textarea" ||
+    tagName === "select" ||
+    (tagName === "input" &&
+      !["button", "checkbox", "radio", "range", "reset", "submit"].includes(
+        (target as HTMLInputElement).type
+      ))
+  );
+};
+
 export function RootLayout() {
+  useTvRemoteNavigation();
+
   const location = useLocation();
   const navigate = useNavigate();
   const { isFullScreenPlayer, setIsFullScreenPlayer: setStoreFullScreen } =
@@ -86,18 +105,16 @@ export function RootLayout() {
     if (Capacitor.isNativePlatform()) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (!WEB_BACK_KEYS.has(e.key) || isEditableTarget(e.target)) return;
 
-      const handled = handleExitLayer();
-      if (handled) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
+      e.preventDefault();
+      e.stopPropagation();
+      void handleBackAction();
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleExitLayer]);
+  }, [handleBackAction]);
 
   const hasCurrentTrack = useMusicStore(
     (s) => s.queue.length > 0 && s.currentIndex >= 0

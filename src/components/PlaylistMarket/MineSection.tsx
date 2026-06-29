@@ -192,7 +192,11 @@ const AlbumGrid = ({
     {list.map((item) => (
       <div
         key={item.id}
-        className="group flex flex-col gap-2.5 transition-all hover:translate-y-[-4px]"
+        className="group flex flex-col gap-2.5 rounded-lg transition-all hover:translate-y-[-4px]"
+        role="button"
+        tabIndex={0}
+        data-tv-focusable="true"
+        aria-label={`打开专辑 ${item.name}`}
         onClick={() => onClick(item.id)}
       >
         <div className="relative aspect-square rounded-md overflow-hidden shadow-md ring-1 ring-black/5 hover:shadow-xl transition-shadow cursor-pointer">

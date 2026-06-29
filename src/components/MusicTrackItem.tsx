@@ -129,7 +129,11 @@ export function MusicTrackItem({
       )}
     >
       <div
-        className="col-span-2 grid grid-cols-[1.75rem_1fr] gap-4 items-center"
+        className="col-span-2 grid grid-cols-[1.75rem_1fr] gap-4 items-center rounded-lg"
+        role="button"
+        tabIndex={0}
+        data-tv-focusable="true"
+        aria-label={`${showCheckbox ? "选择" : "播放"} ${track.name}`}
         onClick={showCheckbox ? onSelect : onPlay}
       >
         <div className="flex justify-center shrink-0">
