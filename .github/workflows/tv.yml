@@ -1,5 +1,4 @@
-name: Release Mobile (Android Only)
-
+name: buid tv apk
 on:
   workflow_dispatch:
 
