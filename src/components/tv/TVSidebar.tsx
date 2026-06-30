@@ -34,7 +34,7 @@ export function TVSidebar() {
       </div>
 
       {/* 导航项 */}
-      <nav className="flex flex-col gap-1">
+      <nav className="flex flex-col">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname.startsWith(item.path);
           const Icon = item.icon;

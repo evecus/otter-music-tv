@@ -1,103 +1,188 @@
 /* ============================================================
    tv.css — Android TV / 大屏专用样式
-   在 TV 模式下由 TVLayout 动态 import，不影响手机端体积。
+   ============================================================
+
+   ⚠️  兼容性须知（真实 Android 9 TV 盒子的系统 WebView 经常多年
+   不更新，可能停留在 Chrome 60~70，需要按最保守的标准写 CSS）：
+   - 禁用 dvh / svh / lvh → 一律用 vh / 100% 代替
+   - 禁用 flexbox gap（Chrome 84+ 才支持）→ 全部用 margin 代替
+   - 禁用 :has()
+   - 所有 flex 属性都加 -webkit- 前缀兜底
    ============================================================ */
 
-/* ---- 1. 全局字号放大（TV 观看距离更远）---- */
+/* ---- 1. 全局字号放大 ---------------------------------------- */
 html.tv-mode {
-  font-size: 18px; /* 手机默认 16px */
+  font-size: 18px;
 }
 
-/* ---- 2. 滚动条隐藏（遥控器不需要拖动滚动条）---- */
+/* ---- 2. 滚动条隐藏 ------------------------------------------ */
 html.tv-mode ::-webkit-scrollbar {
   display: none;
 }
-
-/* ---- 3. 焦点高亮环 —— TV 最核心的交互反馈 ---- */
-/*
-  使用 :focus-visible 而非 :focus，
-  避免鼠标点击时也出现焦点环（手机/触屏不受影响）。
-*/
-html.tv-mode *:focus-visible {
-  outline: 3px solid hsl(var(--ring, 158 100% 31%)) !important;
-  outline-offset: 3px !important;
-  border-radius: 8px;
-  /* 阴影让焦点环在深色背景上也清晰可见 */
-  box-shadow:
-    0 0 0 6px hsl(var(--ring, 158 100% 31%) / 0.25),
-    0 0 16px hsl(var(--ring, 158 100% 31%) / 0.4) !important;
-  transition: outline 0.1s, box-shadow 0.1s;
+html.tv-mode * {
+  scrollbar-width: none;
 }
 
-/* ---- 4. TV 侧边栏导航 ---- */
+/* ---- 3. 焦点高亮环 -------------------------------------------
+   同时覆盖 :focus 和 :focus-visible（老 WebView 可能不支持后者）
+   ----------------------------------------------------------- */
+html.tv-mode *:focus {
+  outline: 3px solid hsl(159, 45%, 56%) !important;
+  outline-offset: 3px !important;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 6px rgba(85, 183, 143, 0.25),
+    0 0 18px rgba(85, 183, 143, 0.45) !important;
+}
+
+html.tv-mode.using-mouse *:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* ---- 4. TV 主布局 ------------------------------------------- */
+.tv-main-layout {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  height: 100vh; /* 不用 100dvh，老 WebView 会解析失败导致整段规则失效 → 高度为 0 → 白屏 */
+  overflow: hidden;
+  background: var(--background, hsl(218, 36%, 9%));
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* ---- 5. 右侧内容区 ------------------------------------------ */
+.tv-content-area {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  flex: 1 1 auto;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0; /* 关键：没有这行，flex 子项默认 min-height:auto，内容撑爆会导致整体布局错乱 */
+  overflow: hidden;
+  padding-top: 0 !important; /* 覆盖移动端内容自带的 pt-safe / pt-11 */
+}
+
+.tv-page-scroll {
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 0 !important;
+  position: relative; /* 给内部 absolute 元素提供定位上下文 */
+  min-height: 0; /* 关键：老 WebView flex 子项默认 min-height:auto 会撑爆滚动容器 */
+}
+
+/* ---- 6. 侧边导航栏 ------------------------------------------ */
 .tv-sidebar {
   width: 220px;
   min-width: 220px;
-  height: 100dvh;
+  height: 100%;
+  display: -webkit-box;
+  display: -webkit-flex;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
   flex-direction: column;
-  background: var(--sidebar, hsl(214 42% 7%));
-  border-right: 1px solid hsl(var(--border, 217 15% 17%));
-  padding: 24px 12px 16px;
-  gap: 4px;
+  background: var(--sidebar, hsl(214, 42%, 7%));
+  border-right: 1px solid hsl(217, 15%, 17%);
+  padding: 28px 12px 16px;
   overflow: hidden;
+  -webkit-flex-shrink: 0;
+  flex-shrink: 0;
 }
 
 .tv-sidebar__logo {
-  padding: 0 12px 20px;
+  padding: 0 12px 24px;
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--primary, hsl(159 45% 56%));
+  color: var(--primary, hsl(159, 45%, 56%));
   letter-spacing: 0.02em;
+  display: -webkit-box;
+  display: -webkit-flex;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
   align-items: center;
-  gap: 10px;
+}
+.tv-sidebar__logo > * + * {
+  margin-left: 10px;
 }
 
 .tv-nav-item {
+  display: -webkit-box;
+  display: -webkit-flex;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
   align-items: center;
-  gap: 14px;
   padding: 14px 16px;
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 500;
-  color: var(--sidebar-foreground, hsl(215 27% 91%));
+  color: var(--sidebar-foreground, hsl(215, 27%, 91%));
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
   text-decoration: none;
   border: 2px solid transparent;
-  outline: none; /* 由 :focus-visible 统一控制 */
+  -webkit-transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.tv-nav-item + .tv-nav-item {
+  margin-top: 4px;
+}
+.tv-nav-item > * + * {
+  margin-left: 14px;
 }
 
-.tv-nav-item:hover,
-.tv-nav-item:focus-visible {
-  background: var(--sidebar-accent, hsl(217 21% 12%));
-  color: var(--sidebar-primary, hsl(161 40% 54%));
+.tv-nav-item:hover {
+  background: var(--sidebar-accent, hsl(217, 21%, 12%));
+  color: var(--sidebar-primary, hsl(161, 40%, 54%));
 }
 
 .tv-nav-item.active {
-  background: var(--sidebar-accent, hsl(217 21% 12%));
-  color: var(--sidebar-primary, hsl(161 40% 54%));
-  border-color: var(--sidebar-primary, hsl(161 40% 54%));
+  background: var(--sidebar-accent, hsl(217, 21%, 12%));
+  color: var(--sidebar-primary, hsl(161, 40%, 54%));
+  border-color: var(--sidebar-primary, hsl(161, 40%, 54%));
 }
 
 .tv-nav-item__icon {
   width: 22px;
   height: 22px;
+  -webkit-flex-shrink: 0;
   flex-shrink: 0;
 }
 
-/* ---- 5. TV 播放控制栏 ---- */
+/* ---- 7. 底部播放控制栏 -------------------------------------- */
 .tv-player-bar {
-  height: 90px;
+  height: 88px;
+  -webkit-flex-shrink: 0;
   flex-shrink: 0;
+  display: -webkit-box;
+  display: -webkit-flex;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
   align-items: center;
-  gap: 20px;
   padding: 0 28px;
-  background: var(--card, hsl(215 30% 11%));
-  border-top: 1px solid hsl(var(--border, 217 15% 17%));
+  background: var(--card, hsl(215, 30%, 11%));
+  border-top: 1px solid hsl(217, 15%, 17%);
+}
+.tv-player-bar > * + * {
+  margin-left: 20px;
 }
 
 .tv-player-bar__cover {
@@ -105,18 +190,26 @@ html.tv-mode *:focus-visible {
   height: 56px;
   border-radius: 8px;
   overflow: hidden;
+  -webkit-flex-shrink: 0;
   flex-shrink: 0;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .tv-player-bar__info {
-  flex: 1;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
+  cursor: pointer;
 }
 
 .tv-player-bar__title {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--foreground, hsl(213 30% 93%));
+  color: var(--foreground, hsl(213, 30%, 93%));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -124,7 +217,7 @@ html.tv-mode *:focus-visible {
 
 .tv-player-bar__artist {
   font-size: 0.875rem;
-  color: var(--muted-foreground, hsl(215 7% 65%));
+  color: var(--muted-foreground, hsl(215, 7%, 65%));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -132,147 +225,132 @@ html.tv-mode *:focus-visible {
 }
 
 .tv-player-bar__controls {
+  display: -webkit-box;
+  display: -webkit-flex;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
   align-items: center;
-  gap: 12px;
+  -webkit-flex-shrink: 0;
   flex-shrink: 0;
+}
+.tv-player-bar__controls > * + * {
+  margin-left: 10px;
 }
 
 .tv-ctrl-btn {
   width: 48px;
   height: 48px;
   border-radius: 50%;
+  display: -webkit-box;
+  display: -webkit-flex;
   display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
   align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
   justify-content: center;
   background: transparent;
   border: 2px solid transparent;
-  color: var(--foreground, hsl(213 30% 93%));
+  color: var(--foreground, hsl(213, 30%, 93%));
   cursor: pointer;
+  -webkit-transition: background 0.15s, color 0.15s;
   transition: background 0.15s, color 0.15s;
-  outline: none;
 }
 
-.tv-ctrl-btn:hover,
-.tv-ctrl-btn:focus-visible {
-  background: var(--secondary, hsl(219 18% 15%));
-  color: var(--primary, hsl(159 45% 56%));
+.tv-ctrl-btn:hover {
+  background: var(--secondary, hsl(219, 18%, 15%));
+  color: var(--primary, hsl(159, 45%, 56%));
 }
 
 .tv-ctrl-btn--primary {
   width: 56px;
   height: 56px;
-  background: var(--primary, hsl(159 45% 56%));
-  color: var(--primary-foreground, hsl(218 17% 9%));
+  background: var(--primary, hsl(159, 45%, 56%));
+  color: var(--primary-foreground, hsl(218, 17%, 9%));
 }
 
-.tv-ctrl-btn--primary:hover,
-.tv-ctrl-btn--primary:focus-visible {
-  background: var(--accent, hsl(170 37% 49%));
-  color: var(--accent-foreground, hsl(223 24% 6%));
+.tv-ctrl-btn--primary:hover {
+  background: var(--accent, hsl(170, 37%, 49%));
 }
 
-/* 进度条 */
+/* ---- 8. 进度条 ---------------------------------------------- */
 .tv-progress-wrap {
-  flex: 1;
-  min-width: 200px;
+  -webkit-box-flex: 1;
+  -webkit-flex: 1 1 auto;
+  flex: 1 1 auto;
+  min-width: 160px;
+  display: -webkit-box;
+  display: -webkit-flex;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
   flex-direction: column;
-  gap: 4px;
+}
+.tv-progress-wrap > * + * {
+  margin-top: 4px;
 }
 
 .tv-progress-bar {
   width: 100%;
   height: 4px;
-  background: var(--muted, hsl(215 18% 13%));
+  background: hsl(215, 18%, 20%);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .tv-progress-bar__fill {
   height: 100%;
-  background: var(--primary, hsl(159 45% 56%));
+  background: var(--primary, hsl(159, 45%, 56%));
   border-radius: 2px;
+  -webkit-transition: width 0.5s linear;
   transition: width 0.5s linear;
 }
 
 .tv-progress-time {
+  display: -webkit-box;
+  display: -webkit-flex;
   display: flex;
+  -webkit-box-pack: justify;
+  -webkit-justify-content: space-between;
   justify-content: space-between;
   font-size: 0.75rem;
-  color: var(--muted-foreground, hsl(215 7% 65%));
+  color: var(--muted-foreground, hsl(215, 7%, 65%));
 }
 
-/* ---- 6. TV 主内容区 ---- */
-.tv-main-layout {
-  display: flex;
-  height: 100dvh;
-  overflow: hidden;
-  background: var(--background, hsl(218 36% 9%));
+/* ---- 9. 内容页适配 -------------------------------------------
+   MusicSearchView 等页面组件原本写死 h-full，假设父级是
+   MusicLayout 提供的 flex:1 min-h-0 容器。在 .tv-page-scroll
+   （overflow-y:auto 的滚动容器）里，h-full 没有明确高度基准，
+   会导致内容塌陷或撑爆。统一改为 h-auto + min-height:100%。
+   ----------------------------------------------------------- */
+html.tv-mode .tv-page-scroll > div.h-full,
+html.tv-mode .tv-page-scroll > div.flex.h-full {
+  height: auto !important;
+  min-height: 100%;
 }
 
-.tv-content-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  overflow: hidden;
+/* PlaylistMarket / 横幅卡片等组件在桌面宽度下可能有写死的 px 宽度，
+   这里统一限制最大宽度，避免横向溢出导致内容错位 */
+html.tv-mode .tv-page-scroll img,
+html.tv-mode .tv-page-scroll video {
+  max-width: 100%;
 }
 
-.tv-page-scroll {
-  flex: 1;
-  overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-}
-
-/* ---- 7. TV 歌曲列表项 —— 更大的点击区域 ---- */
+/* ---- 10. 歌曲列表项 ------------------------------------------ */
+html.tv-mode [role="button"][tabindex="0"],
 html.tv-mode .music-track-item {
-  padding: 14px 16px !important;
-  min-height: 60px !important;
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+  min-height: 56px;
 }
 
-/* ---- 8. TV 搜索框 —— 更大输入区域 ---- */
-html.tv-mode input[type="text"],
-html.tv-mode input[type="search"] {
-  font-size: 1rem;
-  padding: 12px 16px;
-  height: auto;
-}
-
-/* ============================================================
-   tv.css 补丁：Android TV WebView 兼容性
-   ============================================================ */
-
-/*
-  Android TV WebView (Chromium) 用方向键移动焦点时触发 :focus-visible，
-  但部分老版本 WebView 只触发 :focus。
-  这里同时覆盖 :focus（在 tv-mode 下），确保焦点环在所有 WebView 版本可见。
-*/
-html.tv-mode *:focus {
-  outline: 3px solid hsl(var(--ring, 158 100% 31%)) !important;
-  outline-offset: 3px !important;
-  border-radius: 8px;
-  box-shadow:
-    0 0 0 6px hsl(var(--ring, 158 100% 31%) / 0.25),
-    0 0 16px hsl(var(--ring, 158 100% 31%) / 0.4) !important;
-}
-
-/* 但鼠标点击时不要焦点环（:focus-not-visible 场景，用 JS 辅助） */
-html.tv-mode.using-mouse *:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
-/* MusicTrackItem 在 TV 模式下加大点击区域 */
-html.tv-mode [tabindex="0"] {
-  min-height: 48px;
-}
-
-/* 搜索输入框在 TV 模式下更大 */
+/* ---- 11. 输入框 ------------------------------------------------ */
 html.tv-mode input[type="text"],
 html.tv-mode input[type="search"],
-html.tv-mode input {
+html.tv-mode input:not([type="checkbox"]):not([type="radio"]) {
   font-size: 1rem !important;
-  padding: 10px 14px !important;
-  height: auto !important;
+  min-height: 44px;
 }
